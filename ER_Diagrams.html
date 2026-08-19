@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ER Forensics — Diagrams</title>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "default", er: { fontSize: 13 } });
+</script>
+<style>
+  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; max-width: 1100px; margin: 40px auto; padding: 0 20px; color: #1a1a1a; }
+  h1 { font-size: 26px; border-bottom: 3px solid #222; padding-bottom: 10px; }
+  h2 { font-size: 20px; margin-top: 60px; background: #222; color: #fff; padding: 8px 14px; border-radius: 4px; }
+  h3 { font-size: 15px; text-transform: uppercase; letter-spacing: 0.05em; color: #555; margin-top: 28px; margin-bottom: 6px; }
+  .pair { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
+  .col { flex: 1; min-width: 420px; }
+  .diagram-box { border: 1px solid #ddd; border-radius: 8px; padding: 14px; background: #fafafa; overflow-x: auto; }
+  .flawed .diagram-box { border-left: 4px solid #c0392b; }
+  .fixed .diagram-box { border-left: 4px solid #27ae60; }
+  .note { font-size: 13px; color: #666; margin-top: 6px; }
+  .toc { line-height: 1.9; }
+  .toc a { color: #1a5fb4; text-decoration: none; }
+  footer { margin-top: 60px; font-size: 12px; color: #888; text-align: center; }
+  @media print {
+    h2 { break-before: page; }
+    .pair { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<h1>DBMS Lab — ER Forensics: Diagrams</h1>
+<p>Original (flawed) ER diagrams recreated on the left, minimally corrected ER diagram fragments on the right. Full write-ups of the 4 issues per question are in the companion <code>Q1</code>–<code>Q5</code> markdown files in this folder.</p>
+
+<div class="toc">
+  <strong>Jump to:</strong><br>
+  <a href="#q1">Q1 — University Course Registration</a><br>
+  <a href="#q2">Q2 — Hospital Prescription System</a><br>
+  <a href="#q3">Q3 — E-Commerce Order Fulfilment</a><br>
+  <a href="#q4">Q4 — Project Staffing and Roles</a><br>
+  <a href="#q5">Q5 — Airline Booking and Seat Assignment</a>
+</div>
+
+<!-- Q1 -->
+<h2 id="q1">Question 1 — University Course Registration</h2>
+<div class="pair">
+  <div class="col flawed">
+    <h3>Original (Flawed)</h3>
+    <div class="diagram-box">
+      <pre class="mermaid">
+erDiagram
+    STUDENT {
+        string StudentID PK
+        string Name
+        string Email
+    }
+    COURSE {
+        string CourseID PK
+        string Title
+        int Credits
+        string Semester
+        int Year
+    }
+    INSTRUCTOR {
+        string InstructorID PK
+        string Name
+        string Department
+    }
+    CLASSROOM {
+        string RoomNo PK
+        string Building
+    }
+    STUDENT }o--o{ COURSE : ENROLLS
+    INSTRUCTOR }o--o{ COURSE : TEACHES
+    COURSE }o--|| CLASSROOM : HELD_IN
+      </pre>
+    </div>
+    <p class="note">Semester/Year live on Course; Instructor, Classroom and Student all attach directly to Course — no Section.</p>
+  </div>
+  <div class="col fixed">
+    <h3>Corrected</h3>
+    <div class="diagram-box">
+      <pre class="mermaid">
+erDiagram
+    COURSE {
+        string CourseID PK
+        string Title
+        int Credits
+    }
+    SECTION {
+        string SectionID PK
+        string Semester
+        int Year
+    }
+    INSTRUCTOR {
+        string InstructorID PK
+        string Name
+        string Department
+    }
+    STUDENT {
+        string StudentID PK
+        string Name
+        string Email
+    }
+    CLASSROOM {
+        string RoomNo PK
+        string Building
+    }
+    COURSE ||--o{ SECTION : OFFERS
+    INSTRUCTOR ||--o{ SECTION : TEACHES
+    STUDENT }o--o{ SECTION : ENROLLS
+    SECTION }o--|| CLASSROOM : HELD_IN
+      </pre>
+    </div>
+    <p class="note">New Section entity carries Semester/Year; Teaches, Enrolls and Held_In all reattach to Section.</p>
+  </div>
+</div>
+
+<!-- Q2 -->
+<h2 id="q2">Question 2 — Hospital Prescription System</h2>
+<div class="pair">
+  <div class="col flawed">
+    <h3>Original (Flawed)</h3>
+    <div class="diagram-box">
+      <pre class="mermaid">
+erDiagram
+    PATIENT {
+        string PatientID PK
+        string Name
+        date DOB
+    }
+    DOCTOR {
+        string DoctorID PK
+        string Name
+        string Specialization
+    }
+    MEDICINE {
+        string MedicineID PK
+        string Name
+        string Manufacturer
+        string Dosage
+    }
+    PATIENT }o--o{ DOCTOR : CONSULTS
+    DOCTOR }o--o{ MEDICINE : PRESCRIBES
+    PATIENT }o--o{ MEDICINE : TAKES
+      </pre>
+    </div>
+    <p class="note">Dosage fixed on Medicine; Consults/Prescribes/Takes are plain relationships with no visit or prescription record.</p>
+  </div>
+  <div class="col fixed">
+    <h3>Corrected</h3>
+    <div class="diagram-box">
+      <pre class="mermaid">
+erDiagram
+    PATIENT {
+        string PatientID PK
+        string Name
+        date DOB
+    }
+    DOCTOR {
+        string DoctorID PK
+        string Name
+        string Specialization
+    }
+    CONSULTATION {
+        string ConsultationID PK
+        date VisitDate
+    }
+    PRESCRIPTION {
+        string PrescriptionID PK
+        string Dosage
+        string Frequency
+        string Duration
+    }
+    MEDICINE {
+        string MedicineID PK
+        string Name
+        string Manufacturer
+    }
+    PATIENT ||--o{ CONSULTATION : HAS
+    DOCTOR ||--o{ CONSULTATION : CONDUCTS
+    CONSULTATION ||--o{ PRESCRIPTION : RESULTS_IN
+    PRESCRIPTION }o--|| MEDICINE : PRESCRIBES
+      </pre>
+    </div>
+    <p class="note">Consultation and Prescription entities added; Dosage moved off Medicine and onto Prescription; Takes removed (derived).</p>
+  </div>
+</div>
+
+<!-- Q3 -->
+<h2 id="q3">Question 3 — E-Commerce Order Fulfilment</h2>
+<div class="pair">
+  <div class="col flawed">
+    <h3>Original (Flawed)</h3>
+    <div class="diagram-box">
+      <pre class="mermaid">
+erDiagram
+    CUSTOMER {
+        string CustomerID PK
+        string Name
+        string ShippingAddress
+    }
+    ORDER {
+        string OrderID PK
+        date OrderDate
+        date ShipmentDate
+    }
+    PRODUCT {
+        string ProductID PK
+        string Name
+    }
+    SHIPMENT {
+        string ShipmentID PK
+        string Carrier
+    }
+    WAREHOUSE {
+        string WarehouseID PK
+        string Location
+    }
+    CUSTOMER ||--o{ ORDER : PLACES
+    ORDER }o--o{ PRODUCT : CONTAINS
+    ORDER }o--o{ SHIPMENT : SHIPPED_BY
+    SHIPMENT }o--|| WAREHOUSE : FROM
+      </pre>
+    </div>
+    <p class="note">ShippingAddress fixed on Customer; ShipmentDate fixed on Order; Contains has no Quantity; Shipped_By is Order-level, not line-level.</p>
+  </div>
+  <div class="col fixed">
+    <h3>Corrected</h3>
+    <div class="diagram-box">
+      <pre class="mermaid">
+erDiagram
+    CUSTOMER {
+        string CustomerID PK
+        string Name
+    }
+    ORDER {
+        string OrderID PK
+        date OrderDate
+        string DeliveryAddress
+    }
+    ORDERLINE {
+        string OrderLineID PK
+        int Quantity
+    }
+    PRODUCT {
+        string ProductID PK
+        string Name
+    }
+    SHIPMENT {
+        string ShipmentID PK
+        string Carrier
+        date DispatchDate
+    }
+    SHIPMENTLINE {
+        int ShippedQuantity
+    }
+    WAREHOUSE {
+        string WarehouseID PK
+        string Location
+    }
+    CUSTOMER ||--o{ ORDER : PLACES
+    ORDER ||--o{ ORDERLINE : CONTAINS
+    ORDERLINE }o--|| PRODUCT : FOR
+    ORDERLINE ||--o{ SHIPMENTLINE : FULFILLED_BY
+    SHIPMENT ||--o{ SHIPMENTLINE : INCLUDES
+    SHIPMENTLINE }o--|| WAREHOUSE : SHIPPED_FROM
+      </pre>
+    </div>
+    <p class="note">Address moved to Order; OrderLine carries Quantity; ShipmentLine ties a line to a shipment and warehouse for split/partial fulfilment.</p>
+  </div>
+</div>
+
+<!-- Q4 -->
+<h2 id="q4">Question 4 — Project Staffing and Roles</h2>
+<div class="pair">
+  <div class="col flawed">
+    <h3>Original (Flawed)</h3>
+    <div class="diagram-box">
+      <pre class="mermaid">
+erDiagram
+    EMPLOYEE {
+        string EmpID PK
+        string Name
+        string Role
+    }
+    PROJECT {
+        string ProjectID PK
+        string Title
+        int HoursWorked
+    }
+    DEPARTMENT {
+        string DeptID PK
+        string Name
+    }
+    EMPLOYEE }o--o{ PROJECT : WORKS_ON
+    EMPLOYEE }o--|| DEPARTMENT : BELONGS_TO
+    EMPLOYEE }o--o{ PROJECT : MANAGED_BY
+      </pre>
+    </div>
+    <p class="note">Role fixed on Employee; HoursWorked fixed on Project; Works_On/Managed_By are plain relationships with no time period.</p>
+  </div>
+  <div class="col fixed">
+    <h3>Corrected</h3>
+    <div class="diagram-box">
+      <pre class="mermaid">
+erDiagram
+    EMPLOYEE {
+        string EmpID PK
+        string Name
+    }
+    PROJECT {
+        string ProjectID PK
+        string Title
+    }
+    ASSIGNMENT {
+        string AssignmentID PK
+        string Role
+        date StartDate
+        date EndDate
+        int HoursWorked
+    }
+    MANAGER_HISTORY {
+        string RecordID PK
+        date StartDate
+        date EndDate
+    }
+    EMPLOYEE ||--o{ ASSIGNMENT : WORKS_ON
+    PROJECT ||--o{ ASSIGNMENT : STAFFED_BY
+    EMPLOYEE ||--o{ MANAGER_HISTORY : MANAGES
+    PROJECT ||--o{ MANAGER_HISTORY : MANAGED_BY
+      </pre>
+    </div>
+    <p class="note">Role and HoursWorked move into Assignment; ManagerHistory retains every manager's tenure for audit. (Department/Belongs_To unchanged, omitted here.)</p>
+  </div>
+</div>
+
+<!-- Q5 -->
+<h2 id="q5">Question 5 — Airline Booking and Seat Assignment</h2>
+<div class="pair">
+  <div class="col flawed">
+    <h3>Original (Flawed)</h3>
+    <div class="diagram-box">
+      <pre class="mermaid">
+erDiagram
+    PASSENGER {
+        string PassengerID PK
+        string Name
+    }
+    FLIGHT {
+        string FlightNo PK
+        date Date
+        time DepartureTime
+    }
+    AIRCRAFT {
+        string AircraftID PK
+        string Model
+    }
+    AIRPORT {
+        string AirportCode PK
+        string City
+    }
+    SEATED_ON {
+        string SeatNo
+    }
+    PASSENGER }o--o{ FLIGHT : BOOKS
+    FLIGHT }o--|| AIRCRAFT : USES
+    PASSENGER ||--o{ SEATED_ON : ""
+    FLIGHT ||--o{ SEATED_ON : ""
+    AIRCRAFT ||--o{ SEATED_ON : ""
+    FLIGHT }o--|| AIRPORT : ORIGIN
+    FLIGHT }o--|| AIRPORT : DESTINATION
+      </pre>
+    </div>
+    <p class="note">Flight conflates flight-number and dated occurrence; Books has no PNR; Seated_On is ternary (Passenger-Flight-Aircraft), no segment anchor.</p>
+  </div>
+  <div class="col fixed">
+    <h3>Corrected</h3>
+    <div class="diagram-box">
+      <pre class="mermaid">
+erDiagram
+    FLIGHT_NUMBER {
+        string FlightNo PK
+        time DepartureTime
+    }
+    FLIGHT_OCCURRENCE {
+        string OccurrenceID PK
+        date FlightDate
+    }
+    AIRCRAFT {
+        string AircraftID PK
+        string Model
+    }
+    PASSENGER {
+        string PassengerID PK
+        string Name
+    }
+    PNR {
+        string PNRCode PK
+    }
+    PASSENGER_SEGMENT {
+        string SeatNo
+    }
+    AIRPORT {
+        string AirportCode PK
+        string City
+    }
+    FLIGHT_NUMBER ||--o{ FLIGHT_OCCURRENCE : OPERATES_AS
+    FLIGHT_OCCURRENCE }o--|| AIRCRAFT : USES
+    FLIGHT_NUMBER }o--|| AIRPORT : ORIGIN
+    FLIGHT_NUMBER }o--|| AIRPORT : DESTINATION
+    PNR }o--o{ PASSENGER : INCLUDES
+    PNR ||--o{ PASSENGER_SEGMENT : GENERATES
+    PASSENGER ||--o{ PASSENGER_SEGMENT : ASSIGNED
+    FLIGHT_OCCURRENCE ||--o{ PASSENGER_SEGMENT : COVERS
+      </pre>
+    </div>
+    <p class="note">Flight split into FlightNumber/FlightOccurrence; PNR groups passengers+segments; PassengerSegment replaces the ternary, giving seat-per-segment.</p>
+  </div>
+</div>
+
+<footer>DBMS Lab — ER Forensics — Dr. Vikas Srivastava</footer>
+</body>
+</html>
