@@ -16,17 +16,20 @@ Cardinality labels were intentionally omitted from the original diagrams and are
 
 Each question has its own file with: the original flawed model recreated, the business rules, the 4 issues (flaw → information lost → minimal correction), and a corrected ER diagram fragment in [Mermaid](https://mermaid.js.org/syntax/entityRelationshipDiagram.html) `erDiagram` syntax.
 
-The Mermaid diagrams render automatically in GitHub, most modern Markdown viewers (VS Code preview, Obsidian, Typora, etc.), and Notion. If your viewer doesn't support Mermaid, paste the code block into [mermaid.live](https://mermaid.live) to see it rendered.
+The Mermaid diagrams embedded in the `.md` files render automatically in GitHub, most modern Markdown viewers (VS Code preview, Obsidian, Typora, etc.), and Notion. If your viewer doesn't support Mermaid, paste the code block into [mermaid.live](https://mermaid.live) to see it rendered — or just use `ER_Diagrams.html` below, which needs no special viewer.
 
 ## Files
 
-| Question | Topic | Root cause of the flaws |
-|---|---|---|
-| [Q1_University_Course_Registration.md](Q1_University_Course_Registration.md) | University Course Registration | Missing `Section` entity — semester/year, instructor, classroom, and enrollment are all wired to the course catalog level instead of a specific offering |
-| [Q2_Hospital_Prescription_System.md](Q2_Hospital_Prescription_System.md) | Hospital Prescription System | Missing `Consultation`/`Prescription` entities — visits and prescriptions can't repeat or carry their own date/dosage |
-| [Q3_Ecommerce_Order_Fulfilment.md](Q3_Ecommerce_Order_Fulfilment.md) | E-Commerce Order Fulfilment | Missing `OrderLine`/`ShipmentLine` entities — quantity, address, and shipment splitting have no line-item granularity to attach to |
-| [Q4_Project_Staffing_and_Roles.md](Q4_Project_Staffing_and_Roles.md) | Project Staffing and Roles | Missing `Assignment`/`ManagerHistory` entities — role, hours, and management are all time-dependent facts stored as static attributes/edges |
-| [Q5_Airline_Booking_and_Seat_Assignment.md](Q5_Airline_Booking_and_Seat_Assignment.md) | Airline Booking and Seat Assignment | `Flight` conflates flight-number with flight-occurrence, no `PNR` entity, and seating is wrongly modeled as ternary |
+| File | Contents |
+|---|---|
+| **[ER_Diagrams.html](ER_Diagrams.html)** | **Visual diagrams only** — double-click to open in any browser (needs internet, for the Mermaid CDN script). Shows the original flawed diagram next to the corrected diagram, side by side, for all 5 questions. Print or `Cmd/Ctrl+P → Save as PDF` for submission. |
+| [Q1_University_Course_Registration.md](Q1_University_Course_Registration.md) | University Course Registration — full write-up. Missing `Section` entity — semester/year, instructor, classroom, and enrollment are all wired to the course catalog level instead of a specific offering |
+| [Q2_Hospital_Prescription_System.md](Q2_Hospital_Prescription_System.md) | Hospital Prescription System — full write-up. Missing `Consultation`/`Prescription` entities — visits and prescriptions can't repeat or carry their own date/dosage |
+| [Q3_Ecommerce_Order_Fulfilment.md](Q3_Ecommerce_Order_Fulfilment.md) | E-Commerce Order Fulfilment — full write-up. Missing `OrderLine`/`ShipmentLine` entities — quantity, address, and shipment splitting have no line-item granularity to attach to |
+| [Q4_Project_Staffing_and_Roles.md](Q4_Project_Staffing_and_Roles.md) | Project Staffing and Roles — full write-up. Missing `Assignment`/`ManagerHistory` entities — role, hours, and management are all time-dependent facts stored as static attributes/edges |
+| [Q5_Airline_Booking_and_Seat_Assignment.md](Q5_Airline_Booking_and_Seat_Assignment.md) | Airline Booking and Seat Assignment — full write-up. `Flight` conflates flight-number with flight-occurrence, no `PNR` entity, and seating is wrongly modeled as ternary |
+
+**Note:** this is a conceptual ER modeling exercise only — no SQL/MySQL was written or required by the assignment.
 
 ## Common Pattern Across All 5 Questions
 
